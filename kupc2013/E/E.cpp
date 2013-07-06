@@ -79,6 +79,10 @@ namespace solution {
   int A[MAX_DICE];
   int s, g;
   int B[SIZE];
+
+  int len[SIZE];
+  int dice[SIZE][OPERATIONS];
+  int dir[SIZE][OPERATIONS];
 }
 
 // @snippet<sh19910711/contest:solution/solver-area.cpp>
@@ -88,62 +92,94 @@ namespace solution {
     void solve() {
       s --;
       g --;
-      calc_path( s, g );
+      for ( int i = 0; i < M; ++ i ) {
+        calc_path(i, g);
+      }
+
+      srand((unsigned)time(NULL) + (unsigned)rand());
+      int cur = s;
+      int target = s;
+      int ind = 0;
+      int random = 100;
+      for ( int i = 0; i < OPERATIONS; ++ i ) {
+        if ( cur == g )
+          break;
+        int type;
+        cin >> type;
+        if ( i > 0 && ( i % random ) == 0 ) {
+          int o = rand() % 2 == 0 ? 1: -1;
+          if ( cur + A[type - 1] * o >= 0 && cur + A[type - 1] * o < M ) {
+            int next = cur + B[cur + A[type - 1] * o];
+            if ( next >= 0 && next < M ) {
+              target = next;
+              ind = 0;
+              cur = next;
+              cout << o << endl;
+            } else {
+              cout << 0 << endl;
+            }
+          } else {
+            cout << 0 << endl;
+          }
+        } else {
+          int d = dice[target][ind];
+          int k = dir[target][ind];
+          if ( type == d ) {
+            cout << ( k ? 1 : -1 ) << endl;
+            cur = cur + B[cur + A[d] * ( k ? 1 : -1 )];
+          } else {
+            cout << 0 << endl;
+          }
+        }
+      }
     }
 
     void calc_path( int s, int g ) {
       typedef pair <int, int> Node;
-      typedef priority_queue <Node, vector<Node>, greater<Node> > Queue;
+      typedef queue <Node> Queue;
 
       Queue Q;
       Q.push(Node(0, s));
-      int MC[SIZE][2];
+      int MC[SIZE];
       for ( int i = 0; i < SIZE; ++ i )
-        MC[i][0] = MC[i][1] = NONE;
-      MC[s][0] = 0;
-      MC[s][1] = 0;
+        MC[i] = NONE;
+      MC[s] = 0;
       int prev[SIZE];
       fill(prev, prev + SIZE, NONE);
       int expect_dice[SIZE];
       int expect_dir[SIZE];
 
       while ( ! Q.empty() ) {
-        Node node = Q.top();
+        Node node = Q.front();
         Q.pop();
 
         int cost = node.first;
         int pos = node.second;
 
         if ( cost >= OPERATIONS )
-          return;
+          continue;
         
         if ( pos == g ) {
-          int len = 0;
+          len[s] = 0;
           int cur_pos = pos;
-          int dice[OPERATIONS];
-          int dir[OPERATIONS];
           while ( prev[cur_pos] != NONE ) {
-            dice[len] = expect_dice[cur_pos] + 1;
-            dir[len] = expect_dir[cur_pos];
-            len ++;
+            dice[s][len[s]] = expect_dice[cur_pos] + 1;
+            dir[s][len[s]] = expect_dir[cur_pos];
+            len[s] ++;
             cur_pos = prev[cur_pos];
-          }
-
-          for ( int i = 0; i < len; ++ i ) {
-            cout << dice[i] << ", " << dir[i] << endl;
           }
 
           return;
 
           int cur = 0;
-          for ( int i = 0; i < len; ++ i ) {
+          for ( int i = 0; i < len[s]; ++ i ) {
             int type;
             cin >> type;
-            while ( type != dice[i] ) {
+            while ( type != dice[s][i] ) {
               cout << 0 << endl;
               cin >> type;
             }
-            cout << ( dir[i] ? 1 : -1 ) << endl;
+            cout << ( dir[s][i] ? 1 : -1 ) << endl;
           }
 
           return;
@@ -157,9 +193,9 @@ namespace solution {
             npos += B[npos];
             if ( npos < 0 || npos >= M )
               continue;
-            if ( ncost >= MC[npos][j] )
+            if ( ncost >= MC[npos] )
               continue;
-            MC[npos][j] = ncost;
+            MC[npos] = ncost;
             prev[npos] = pos;
             expect_dice[npos] = i;
             expect_dir[npos] = j;
