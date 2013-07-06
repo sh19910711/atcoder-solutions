@@ -1,0 +1,16 @@
+3 12
+5 sogo5gokan
+10 sogo10gokan
+15 sogo15gokan
+3 10
+5 kogakubu11gokan
+10 sogo10gokan
+15 KyotoUniversityResearchPark
+3 3
+5 kogakubu11gokan
+10 sogo10gokan
+15 KyotoUniversityResearchPark
+3 20
+5 kogakubu11gokan
+10 sogo10gokan
+15 KyotoUniversityResearchPark
