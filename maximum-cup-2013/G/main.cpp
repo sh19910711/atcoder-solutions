@@ -300,7 +300,7 @@ namespace solution {
       Node start_node;
       start_node.steps = 0;
       start_node.pos = start_pos;
-      start_node.level = std::min(101, L);
+      start_node.level = std::min(105, L);
       push_next_node(start_node);
     }
 
