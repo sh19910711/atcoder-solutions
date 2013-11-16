@@ -155,7 +155,7 @@ namespace solution {
 // @snippet<sh19910711/contest:solution/consts-area.cpp>
 namespace solution {
   // constant vars
-  const int SIZE          = 10 + 1;
+  const int SIZE          = 20 + 1;
   const int NONE          = -1;
   const int NO_COST       = std::numeric_limits<int>::max();
   const int NO_MONSTER    = NONE;
@@ -487,7 +487,7 @@ namespace solution {
     }
     
     void output( const OutputStorage& out ) {
-      if ( out.result == NONE ) {
+      if ( out.result == NO_COST ) {
         std::cout << IMPOSSIBLE << endl;
       } else {
         std::cout << out.result << endl;
