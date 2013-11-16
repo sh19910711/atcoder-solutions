@@ -103,8 +103,9 @@ namespace search {
       this->init();
       while ( this->has_next_node() ) {
         Node node = this->get_next_node();
-        if ( this->is_goal_node(node) )
-          res = node;
+        if ( this->is_goal_node(node) ) {
+          res = std::min(res, node);
+        }
         this->visit_next_node(node);
       }
       return res;
@@ -156,7 +157,7 @@ namespace solution {
   // constant vars
   const int SIZE          = 10 + 1;
   const int NONE          = -1;
-  const int NO_COST       = NONE;
+  const int NO_COST       = std::numeric_limits<int>::max();
   const int NO_MONSTER    = NONE;
   const int MAX_LEVEL     = 101 + 11;
   const string IMPOSSIBLE = "Impossible";
@@ -166,7 +167,7 @@ namespace solution {
 namespace solution {
   // namespaces, types
   struct Cell {
-    Int pass_cost;
+    int pass_cost;
     int level; // has monster if level > 0
     bool has_up;
     bool has_down;
@@ -205,12 +206,16 @@ namespace solution {
 
 namespace solution {
   struct Node {
-    Int steps;
+    int steps;
     Position pos;
     int level;
 
     friend ostream& operator <<( ostream& os, const Node& node ) {
       return os << "{" << node.steps << ", " << node.pos << ", " << node.level << "}";
+    }
+
+    friend bool operator <( const Node& a, const Node& b ) {
+      return a.steps < b.steps;
     }
   };
 
@@ -231,7 +236,7 @@ namespace solution {
 
         // check cell
         Cell next_cell = M[next_node.pos.k].grid[next_node.pos.r][next_node.pos.c];
-        Int cost = next_cell.pass_cost;
+        int cost = next_cell.pass_cost;
         if ( cost == NO_COST )
           continue;
         int level = next_cell.level;
@@ -239,6 +244,7 @@ namespace solution {
           continue;
         if ( node.level == level )
           next_node.level += 1;
+
         next_node.steps += cost;
 
         this->push_next_node(next_node);
@@ -261,7 +267,7 @@ namespace solution {
     }
 
     Node get_none_node() {
-      Node none = {NONE, POSITION_NONE, NONE};
+      Node none = {NO_COST, POSITION_NONE, NONE};
       return none;
     }
 
@@ -325,7 +331,7 @@ namespace solution {
   };
   
   struct OutputStorage {
-    Int result;
+    int result;
   };
   
   struct DataStorage {
