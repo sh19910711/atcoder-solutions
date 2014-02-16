@@ -55,34 +55,17 @@ namespace solution {
     }
 
     Int get_rb_ways( const Int& rem, const Int& g ) {
-      Int best = std::numeric_limits<Int>::max();
-      {
-        Int l = 0;
-        Int r = 0;
-        while ( l + r + 1 != rem ) {
-          if ( l > r && r + 1 < g ) {
-            r ++;
-          } else {
-            l ++;
-          }
+      Int l = 0;
+      Int r = 0;
+      while ( l + r + 1 != rem ) {
+        if ( l > r && r < g ) {
+          r ++;
+        } else {
+          l ++;
         }
-        Int res = get_ways(l) + get_ways(r);
-        best = std::min(best, res);
       }
-      {
-        Int l = 0;
-        Int r = 0;
-        while ( l + r + 1 != rem ) {
-          if ( l < r || r + 1 >= g ) {
-            l ++;
-          } else if ( r + 1 < g ) {
-            r ++;
-          }
-        }
-        Int res = get_ways(l) + get_ways(r);
-        best = std::min(best, res);
-      }
-      return best;
+      Int res = get_ways(l) + get_ways(r);
+      return res;
     }
 
     Int count_ways( const Int& R, const Int& G, const Int& B ) {
@@ -117,8 +100,43 @@ namespace solution {
       return best;
     }
 
+    Int count_ways_r( const Int& R, const Int& G, const Int& B ) {
+      Int ways = 0;
+      for ( Int l = 0; l < 160; ++ l ) {
+        Int r = R - l - 1;
+        if ( l < 0 || r < 0 )
+          continue;
+        ways += get_ways(l) + get_ways(r);
+        if ( l >= 100 ) {
+          Int diff = l - 100;
+          Int g_ways = diff * G + get_ways(G);
+          ways += g_ways;
+        }
+      }
+      return ways;
+    }
+
+    Int count_ways_b( const Int& R, const Int& G, const Int& B ) {
+      Int ways = 0;
+      for ( Int l = 0; l < 160; ++ l ) {
+        Int r = B - l - 1;
+        if ( l < 0 || r < 0 )
+          continue;
+        ways += get_ways(l) + get_ways(r);
+        if ( l >= 100 ) {
+          Int diff = l - 100;
+          Int g_ways = diff * G + get_ways(G);
+          ways += g_ways;
+        }
+      }
+      return ways;
+    }
+
     void solve() {
-      out->result = count_ways(in->R, in->G, in->B);
+      out->result = std::min(
+        std::min(count_ways_r(in->R, in->G, in->B), count_ways_b(in->R, in->G, in->B)),
+        count_ways(in->R, in->G, in->B)
+      );
     }
     
     bool input() {
