@@ -35,7 +35,8 @@ namespace solution {
 // @snippet<sh19910711/contest-base-simple:solution/template-constants.cpp>
 namespace solution {
   const Int MAX_N = 1000 + 11;
-  const Int INF = std::numeric_limits<Int>::max() / 3;
+  const Int MAX_INF = std::numeric_limits<Int>::max() / 3;
+  const Int MIN_INF = std::numeric_limits<Int>::min() / 3;
 }
 
 // @snippet<sh19910711/contest-base-simple:solution/template-storages.cpp>
@@ -83,32 +84,91 @@ namespace solution {
     //
     
     Solution() {}
+
+    typedef std::queue <Int> Queue;
     
-    Int dist[MAX_N][MAX_N];
+    Int n;
+    Int m;
+    Int A[MAX_N];
+    Int B[MAX_N];
+    Int GC[MAX_N];
+    Int G[MAX_N][MAX_N];
+
+    Int dist[MAX_N];
+    Int min_dist[2][MAX_N];
+    Int max_dist[2][MAX_N];
+    Int super_dist[2];
 
     bool solve() {
-      for ( auto i = 0; i < MAX_N; ++ i ) {
-        for ( auto j = 0; j < MAX_N; ++ j ) {
-          dist[i][j] = INF;
+      for ( auto i = 0; i < 2; ++ i ) {
+        fill(GC, GC + MAX_N, 0);
+        n = in.N[i];
+        m = in.M[i];
+        copy(in.A[i], in.A[i] + m, A);
+        copy(in.B[i], in.B[i] + m, B);
+        generate_graph();
+        super_dist[i] = 0;
+        for ( auto t = 0; t < n; ++ t ) {
+          fill(dist, dist + n, MAX_INF);
+          update_dist(t);
+          Int maxd = MIN_INF;
+          Int mind = MAX_INF;
+          for ( auto j = 0; j < n; ++ j ) {
+            if ( t != j ) {
+              maxd = max(maxd, dist[j]);
+              mind = min(mind, dist[j]);
+              super_dist[i] = max(super_dist[i], dist[j]);
+            }
+          }
+          max_dist[i][t] = maxd;
+          min_dist[i][t] = mind;
         }
       }
-      for ( auto i = 0; i < 2; ++ i ) {
-        for ( auto j = 0; j < in.M[i]; ++ j ) {
-          int a = in.A[i][j];
-          int b = in.B[i][j];
-          dist[a][b] = dist[b][a] = 1;
+      out.max_d = MIN_INF;
+      out.min_d = MAX_INF;
+      for ( auto i = 0; i < in.N[0]; ++ i ) {
+        for ( auto j = 0; j < in.N[1]; ++ j ) {
+          if ( max_dist[0][i] == MIN_INF || max_dist[1][j] == MIN_INF ) continue;
+          out.max_d = max(out.max_d, max_dist[0][i] + max_dist[1][j] + 1);
+          out.min_d = min(out.min_d, max_dist[0][i] + max_dist[1][j] + 1);
         }
-        update_dist();
+      }
+      if ( in.M[0] == 0 || in.M[1] == 0 ) {
+        if ( in.M[0] == 0 ) {
+          out.max_d = in.N[1];
+          out.min_d = min(in.N[1], in.N[1] / 2 + 1);
+        } else {
+          out.max_d = in.N[0];
+          out.min_d = min(in.N[0], in.N[0] / 2 + 1);
+        }
+      } else {
+        Int super = max(super_dist[0], super_dist[1]);
+        out.max_d = max(out.max_d, super);
+        out.min_d = max(out.min_d, super);
       }
       return true;
     }
 
-    void update_dist() {
-      for ( auto k = 0; k < MAX_N; ++ k ) {
-        for ( auto i = 0; i < MAX_N; ++ i ) {
-          for ( auto j = 0; j < MAX_N; ++ j ) {
-            dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
-          }
+    void generate_graph() {
+      for ( auto i = 0; i < m; ++ i ) {
+        const auto& a = A[i];
+        const auto& b = B[i];
+        G[a][GC[a] ++] = b;
+        G[b][GC[b] ++] = a;
+      }
+    }
+
+    void update_dist( const Int& s ) {
+      Queue Q;
+      Q.push(s);
+      dist[s] = 0;
+      while ( ! Q.empty() ) {
+        const auto& cur = Q.front(); Q.pop();
+        for ( auto i = 0; i < GC[cur]; ++ i ) {
+          const auto& to = G[cur][i];
+          if ( dist[cur] + 1 >= dist[to] ) continue;
+          dist[to] = dist[cur] + 1;
+          Q.push(to);
         }
       }
     }
