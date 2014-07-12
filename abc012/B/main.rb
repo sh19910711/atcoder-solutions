@@ -1,0 +1,1 @@
+puts Time.at(gets.to_i).strftime('%T')
