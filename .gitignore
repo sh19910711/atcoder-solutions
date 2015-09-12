@@ -1,1 +1,6 @@
-**/.*.swp
+.omakedb
+.omakedb.lock
+.*.swp
+*.omc
+output.txt
+main
